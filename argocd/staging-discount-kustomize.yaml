@@ -9,11 +9,13 @@ spec:
     namespace: staging
     server: 'https://kubernetes.default.svc'
   source:
-    path: applications/kusmotize/overlays/staging
-    repoURL:  https://github.com/davidseve/argocd-example-applications.git
+    path: applications/kustomize/overlays/staging
+    repoURL:  https://github.com/davidseve/argocd-example-application.git
     targetRevision: HEAD
   project: default
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:     # Sync options which modifies sync behavior
+    - CreateNamespace=true
