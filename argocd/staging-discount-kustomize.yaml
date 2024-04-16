@@ -13,7 +13,3 @@ spec:
     repoURL:  https://github.com/davidseve/argocd-example-application.git
     targetRevision: HEAD
   project: default
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
