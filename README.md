@@ -15,7 +15,7 @@ ARGOCD_ROUTE=$(oc -n openshift-gitops get route openshift-gitops-server -o jsonp
 
 argocd login --name admin --password EWMt4mnpfhF9DY1V6zcPrsuweHqKoLx7 $ARGOCD_ROUTE
 
-argocd app diff openshift-gitops/staging-discounts --revision  rama-delete
+argocd app diff openshift-gitops/staging-discounts --revision  diff-branch
 ```
 
 Out put should be like this:
