@@ -6,10 +6,10 @@ metadata:
 spec:
   destination:
     name: ''
-    namespace: staging
+    namespace: openshift-gitops
     server: 'https://kubernetes.default.svc'
   source:
-    path: applications/kustomize/overlays/staging
+    path: application/kustomize/overlays/staging
     repoURL:  https://github.com/davidseve/argocd-example-application.git
     targetRevision: HEAD
   project: default
@@ -17,5 +17,3 @@ spec:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:     # Sync options which modifies sync behavior
-    - CreateNamespace=true
