@@ -1,0 +1,29 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: pull-request-pipeline
+spec:
+  params:
+  - name: application-name
+    description: name of the application to sync
+    type: string
+  - name: revision
+    description: the revision to sync to
+    default: HEAD
+    type: string
+  workspaces:
+  - name: diff-result
+
+  tasks:
+  - name: argocd-task-diff
+    taskRef:
+      kind: Task
+      name: argocd-task-diff
+    params:
+    - name: application-name
+      value: $(params.application-name)
+    - name: revision
+      value: $(params.revision)
+    workspaces:
+    - name: output
+      workspace: diff-result

@@ -1,9 +1,15 @@
 # argocd-example-application
 
 ## Installation
+- Openshift Pipelines
 - Openshift GitOps
 
-## Argo CD diff demo
+```
+oc apply -f ./cluster-configuration
+```
+Wait till both operators are installed
+
+## Argo CD diff demo manual
 
 - Create an application in Argo CD
 - Create a new branch called diff-branch
@@ -28,3 +34,24 @@ Out put should be like this:
 >   replicas: 8
 ```
 
+## Argo CD diff demo pipeline
+
+### Get Argo CD configuration
+Get Argo CD server address and update the file pullrequest/pipeline/argocd-env-configmap.yaml
+
+```
+oc -n openshift-gitops get route openshift-gitops-server -o jsonpath='{.spec.host}'
+```
+
+Also update he file pullrequest/pipeline/argocd-env-secret.yaml with Argo CD user and password or token.
+
+Use this command to get admin password:
+```
+oc extract secret/openshift-gitops-cluster -n openshift-gitops --to=-
+```
+
+### Deploy pipelines
+
+```
+oc apply -f ./pullrequest/pipeline/
+```
