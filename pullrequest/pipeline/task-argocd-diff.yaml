@@ -2,6 +2,7 @@ apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
   name: argocd-task-diff
+  namespace: ci  
 spec:
   params:
     - name: application-name

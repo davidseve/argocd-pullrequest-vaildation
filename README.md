@@ -24,7 +24,7 @@ oc extract secret/openshift-gitops-cluster -n openshift-gitops --to=-
 ```
 ARGOCD_ROUTE=$(oc -n openshift-gitops get route openshift-gitops-server -o jsonpath='{.spec.host}')
 
-argocd login --name admin --password EWMt4mnpfhF9DY1V6zcPrsuweHqKoLx7 $ARGOCD_ROUTE
+argocd login --name admin --password <<CHANGE_ME>> $ARGOCD_ROUTE
 
 argocd app diff openshift-gitops/staging-discounts --revision  diff-branch
 ```
