@@ -1,0 +1,11 @@
+{
+  "environment": "staging",
+  "cloud": "1",
+  "cluster": {
+      "name": "OCP-STA-01",
+      "alias": "ocp-STA-01",
+      "address": "https://kubernetes.default.svc"
+  }
+}
+
+  

@@ -3,4 +3,4 @@ kind: ConfigMap
 metadata:
   name: argocd-env-configmap
 data:
-  ARGOCD_SERVER: <Argo CD server address>
+  ARGOCD_SERVER: openshift-gitops-server-openshift-gitops.apps-crc.testing

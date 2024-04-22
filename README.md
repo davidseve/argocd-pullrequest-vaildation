@@ -9,6 +9,11 @@ oc apply -f ./cluster-configuration
 ```
 Wait till both operators are installed
 
+For getting Argo CD admin pass:
+```
+oc extract secret/openshift-gitops-cluster -n openshift-gitops --to=-
+```
+
 ## Argo CD diff demo manual
 
 - Create an application in Argo CD

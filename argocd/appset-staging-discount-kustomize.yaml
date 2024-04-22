@@ -1,0 +1,29 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: production-etcd
+  namespace: openshift-gitops
+spec:
+  generators:
+  - git:
+      repoURL: https://github.com/davidseve/argocd-example-application.git
+      revision: HEAD
+      files:
+      - path: "cluster-definition/**/cluster.json"
+  syncPolicy:
+    preserveResourcesOnDeletion: true
+  template:
+    metadata:
+      name: staging-discounts
+      namespace: openshift-gitops
+    spec:
+      destination:
+        name: ''
+        namespace: openshift-gitops
+        server: 'https://kubernetes.default.svc'
+      source:
+        path: application/kustomize/overlays/staging
+        repoURL: https://github.com/davidseve/argocd-example-application.git
+        targetRevision: HEAD
+      project: default

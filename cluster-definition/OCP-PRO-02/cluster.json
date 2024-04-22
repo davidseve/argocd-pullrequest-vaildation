@@ -1,0 +1,11 @@
+{
+  "environment": "production",
+  "cloud": "2",
+  "cluster": {
+      "name": "OCP-PRO-02",
+      "alias": "ocp-pro-02",
+      "address": "https://kubernetes.default.svc"
+  }
+}
+
+  

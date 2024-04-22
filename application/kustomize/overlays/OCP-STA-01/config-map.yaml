@@ -5,4 +5,4 @@ metadata:
   labels:
     deployment: discounts  
 data:
-  application.colour: staging
+  application.colour: staging-1

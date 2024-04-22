@@ -9,7 +9,7 @@ spec:
     namespace: openshift-gitops
     server: 'https://kubernetes.default.svc'
   source:
-    path: application/kustomize/overlays/staging
+    path: application/kustomize/overlays/OCP-STA-01
     repoURL:  https://github.com/davidseve/argocd-example-application.git
     targetRevision: HEAD
   project: default
