@@ -15,15 +15,15 @@ spec:
     preserveResourcesOnDeletion: true
   template:
     metadata:
-      name: staging-discounts
+      name: {{cluster.alias}}-discounts
       namespace: openshift-gitops
     spec:
       destination:
         name: ''
         namespace: openshift-gitops
-        server: 'https://kubernetes.default.svc'
+        server: '{{cluster.address}}'
       source:
-        path: application/kustomize/overlays/staging
+        path: application/kustomize/overlays/{{cluster.name}}
         repoURL: https://github.com/davidseve/argocd-example-application.git
         targetRevision: HEAD
       project: default
