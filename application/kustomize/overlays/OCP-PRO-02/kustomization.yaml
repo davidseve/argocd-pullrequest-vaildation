@@ -6,5 +6,5 @@ commonLabels:
   variant: production-2
 resources:
   - ../../cloud-2/
-patchesStrategicMerge:
-  - config-map.yaml
+patches:
+- path: ./config-map.yaml
