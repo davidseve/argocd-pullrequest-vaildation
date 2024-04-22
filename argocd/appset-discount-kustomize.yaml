@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: production-etcd
+  name: discounts
   namespace: openshift-gitops
 spec:
   generators:
@@ -11,11 +11,11 @@ spec:
       revision: HEAD
       files:
       - path: "cluster-definition/**/cluster.json"
-  syncPolicy:
-    preserveResourcesOnDeletion: true
+  #syncPolicy:
+  #  preserveResourcesOnDeletion: true
   template:
     metadata:
-      name: {{cluster.alias}}-discounts
+      name: '{{cluster.alias}}-discounts'
       namespace: openshift-gitops
     spec:
       destination:
