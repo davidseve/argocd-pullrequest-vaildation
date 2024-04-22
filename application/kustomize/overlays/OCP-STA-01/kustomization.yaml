@@ -6,5 +6,5 @@ commonLabels:
   variant: staging-1
 resources:
   - ../../cloud-1/
-patches:
-- config-map.yaml
+patchesStrategicMerge:
+  - config-map.yaml
