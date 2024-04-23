@@ -39,7 +39,7 @@ spec:
             set +e
             argocd app diff $application --revision "$(params.revision)" "$(params.flags)" > $(workspaces.diff-result.path)/diff-output.txt 2>&1
             local status=$?
-
+            echo $status
             #TODO manage when argocd app diff return error
             
             if [ $status -eq 0 ] 
