@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: discounts-configmap-env-base
+  name: {{ .Values.namePrefix }}discounts-configmap-env-base
   labels:
     deployment: discounts  
 data:

@@ -3,13 +3,13 @@ kind: Route
 metadata:
   labels:
     deployment: discounts
-  name: discounts
+  name: {{ .Values.namePrefix }}discounts
 spec:
   port:
     targetPort: 8080
   to:
     kind: Service
-    name: discounts
+    name: {{ .Values.namePrefix }}discounts
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect

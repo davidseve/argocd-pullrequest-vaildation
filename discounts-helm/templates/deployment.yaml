@@ -1,15 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: discounts
+  name: {{ .Values.namePrefix }}discounts
   labels:
     deployment: discounts
 spec:
-  replicas: { Values.replicas }
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: demo
   template:
     metadata:
       labels:
         deployment: discounts
+        app: demo
     spec:
       containers:
         - name: discounts
@@ -20,7 +24,7 @@ spec:
               protocol: TCP
           envFrom:
           - configMapRef:
-              name: discounts-configmap-env-base
+              name: {{ .Values.namePrefix }}discounts-configmap-env-base
           livenessProbe:
             failureThreshold: 3
             httpGet:
