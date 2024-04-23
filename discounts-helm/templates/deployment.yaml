@@ -5,7 +5,7 @@ metadata:
   labels:
     deployment: discounts
 spec:
-  replicas: 1
+  replicas: { Values.replicas }
   template:
     metadata:
       labels:
