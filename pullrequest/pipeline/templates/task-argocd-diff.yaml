@@ -29,6 +29,8 @@ spec:
       image: quay.io/argoproj/argocd:$(params.argocd-version)   
       script: |
         rm -f $(workspaces.diff-result.path)/diff-output.txt
+        rm -f $(workspaces.diff-result.path)/argocd-applications.txt
+        rm -f $(workspaces.diff-result.path)/argocd-applications-unique.txt
         cat $(workspaces.source.path)/repository/git-diff.txt      
         # Read the file path from the command line argument
         file_path="$(workspaces.source.path)/repository/git-diff.txt"
@@ -50,7 +52,7 @@ spec:
 
             if echo $line | grep -q "/clusters/"; then
                 cluster_values=$(echo "$line" | awk -F'/clusters/' '{print tolower($2)}')
-                cluster_name=$(sed 's/^value-\(.*\)\.yaml$/\1/' <<< $cluster_values)
+                cluster_name=$(echo $cluster_values | sed 's/^value-\(.*\)\.yaml$/\1/')
                 result="$cluster_name-$application"
                 echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt
             elif echo $line | grep -q "/templates/"; then
@@ -95,7 +97,7 @@ spec:
 
         done < "$file_path"
 
-        sort -u "$(workspaces.diff-result.path)/argocd-applications.txt" > "$(workspaces.diff-result.path)/argocd-applications_unique.txt"
+        sort -u "$(workspaces.diff-result.path)/argocd-applications.txt" > "$(workspaces.diff-result.path)/argocd-applications-unique.txt"
 
         argocd_diff() {
             echo "Argo CD diff application=$1"
@@ -121,7 +123,7 @@ spec:
 
         while IFS= read -r line; do
           argocd_diff $line
-        done < "$(workspaces.diff-result.path)/argocd-applications_unique.txt"
+        done < "$(workspaces.diff-result.path)/argocd-applications-unique.txt"
 
 
 

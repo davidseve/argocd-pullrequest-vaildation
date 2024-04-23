@@ -1,0 +1,33 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: appset-discounts-helm
+  namespace: openshift-gitops
+spec:
+  generators:
+  - git:
+      repoURL: https://github.com/davidseve/argocd-example-application.git
+      revision: HEAD
+      files:
+      - path: "cluster-definition/**/cluster.json"
+  #syncPolicy:
+  #  preserveResourcesOnDeletion: true
+  template:
+    metadata:
+      name: '{{cluster.alias}}-discounts-helm'
+      namespace: openshift-gitops
+    spec:
+      destination:
+        name: ''
+        namespace: openshift-gitops
+        server: '{{cluster.address}}'
+      source:
+        repoURL: https://github.com/davidseve/argocd-example-application.git
+        targetRevision: HEAD
+        path: ./discounts-helm 
+        helm: 
+          valueFiles: 
+            - values.yaml 
+            - clusters/values-{{cluster.alias}}.yaml           
+      project: default

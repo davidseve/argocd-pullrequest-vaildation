@@ -1,1 +1,2 @@
 replicas: 3
+namePrefix: helm-01-te

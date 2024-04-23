@@ -1,1 +1,2 @@
 replicas: 4
+namePrefix: helm-02-mov

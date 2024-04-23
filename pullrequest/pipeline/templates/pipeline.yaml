@@ -26,7 +26,7 @@ spec:
     params:
       - name: GIT_SCRIPT
         value: |
-          rm -rf *
+          rm -rf repository
           git config --global --add safe.directory /workspace/source 
           git clone $(params.source-repo) repository
           cd repository
