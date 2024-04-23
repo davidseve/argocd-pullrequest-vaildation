@@ -1,9 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
-namePrefix: production-2-
+namePrefix: mov-2-
 commonLabels:
-  variant: production-2
+  variant: mov-2
 resources:
   - ../../cloud-2/
 patches:

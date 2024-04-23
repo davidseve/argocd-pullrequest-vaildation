@@ -31,15 +31,15 @@ spec:
       
       script: |
         argocd_diff() {
-            echo "$1"
+            echo "Argo CD diff application=$1"
             local application="$1"
             if [ -z "$ARGOCD_AUTH_TOKEN" ]; then
               yes | argocd login "$ARGOCD_SERVER" --username="$ARGOCD_USERNAME" --password="$ARGOCD_PASSWORD";
             fi
             set +e
-            argocd app diff $application --revision "$(params.revision)" "$(params.flags)" > $(workspaces.diff-result.path)/diff-output.txt 2>&1
+            argocd app diff $application --revision "$(params.revision)" "$(params.flags)" >> $(workspaces.diff-result.path)/diff-output.txt 2>&1
             local status=$?
-            echo $status
+            echo "Argo CD diff response=$status"
             #TODO manage when argocd app diff return error
             
             if [ $status -eq 0 ] 
@@ -52,7 +52,7 @@ spec:
             
         }
 
-        rm -f diff-output.txt
+        rm -f $(workspaces.diff-result.path)/diff-output.txt
         cat $(workspaces.source.path)/repository/git-diff.txt      
         # Read the file path from the command line argument
         file_path="$(workspaces.source.path)/repository/git-diff.txt"
@@ -70,22 +70,31 @@ spec:
             cloud1="mov te"
             cloud2="te"
 
-            for value in $cloud1; do
-                # Check if the content contains the first pattern
-                if echo $line | grep -q "/cloud-1/"; then
+            if echo $line | grep -q "/overlays/"; then
+                for value in $cloud1; do
                     result="ocp-01-$value-$application"
                     argocd_diff "$result"
-                fi
-            done
-
-            for value in $cloud2; do
-            
-                if echo $line | grep -q "/cloud-2/"; then
+                done
+                for value in $cloud2; do
                     result="ocp-02-$value-$application"
                     argocd_diff "$result"
-                fi
+                done
+            else
+              for value in $cloud1; do
+                  # Check if the content contains the first pattern
+                  if echo $line | grep -q "/cloud-1/"; then
+                      result="ocp-01-$value-$application"
+                      argocd_diff "$result"
+                  fi
+              done
 
-            done
+              for value in $cloud2; do
+                  if echo $line | grep -q "/cloud-2/"; then
+                      result="ocp-02-$value-$application"
+                      argocd_diff "$result"
+                  fi
+              done
+            fi
 
         done < "$file_path"
 
