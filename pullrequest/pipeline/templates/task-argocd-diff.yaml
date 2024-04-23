@@ -52,10 +52,10 @@ spec:
 
             if echo $line | grep -q "/clusters/"; then
                 cluster_values=$(echo "$line" | awk -F'/clusters/' '{print tolower($2)}')
-                cluster_name=$(echo $cluster_values | sed 's/^value-\(.*\)\.yaml$/\1/')
+                cluster_name=$(echo $cluster_values | sed 's/^values-\(.*\)\.yaml$/\1/')
                 result="$cluster_name-$application"
                 echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt
-            elif echo $line | grep -q "/templates/"; then
+            elif  echo $line | grep -q "/templates/" || echo $line | grep -q "/values.yaml" || echo $line | grep -q "/Chart.yaml"; then
                 for value in $cloud1; do
                     result="ocp-01-$value-$application"
                     echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt
@@ -64,7 +64,6 @@ spec:
                     result="ocp-02-$value-$application"
                     echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt
                 done
-            #TODO add another if the change is in the Chart.yaml and/or values.yaml
             elif echo $line | grep -q "/base/"; then
                 for value in $cloud1; do
                     result="ocp-01-$value-$application"
@@ -101,6 +100,7 @@ spec:
 
         argocd_diff() {
             echo "Argo CD diff application=$1"
+            echo "Argo CD application=$1" >> $(workspaces.diff-result.path)/diff-output.txt
             local application="$1"
             if [ -z "$ARGOCD_AUTH_TOKEN" ]; then
               yes | argocd login "$ARGOCD_SERVER" --username="$ARGOCD_USERNAME" --password="$ARGOCD_PASSWORD";
@@ -113,7 +113,8 @@ spec:
             
             if [ $status -eq 0 ] 
             then 
-              echo "No diff is found" 
+              echo "No diff is found"
+              echo "No diff is found" >> $(workspaces.diff-result.path)/diff-output.txt
             else 
               cat $(workspaces.diff-result.path)/diff-output.txt
               echo "Diff is found" >&2 
