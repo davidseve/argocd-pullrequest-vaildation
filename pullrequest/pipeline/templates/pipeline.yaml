@@ -31,7 +31,9 @@ spec:
           git clone $(params.source-repo) repository
           cd repository
           git checkout $(params.revision)
+          rm -f git-diff.txt
           git diff --name-only main..$(params.revision) > git-diff.txt
+          cat git-diff.txt
     workspaces:
     - name: source
       workspace: source-folder
