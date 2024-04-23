@@ -23,7 +23,7 @@ spec:
         namespace: openshift-gitops
         server: '{{cluster.address}}'
       source:
-        path: discounts-kutomize/overlays/{{cluster.name}}
+        path: discounts-kustomize/overlays/{{cluster.name}}
         repoURL: https://github.com/davidseve/argocd-example-application.git
         targetRevision: HEAD
       project: default

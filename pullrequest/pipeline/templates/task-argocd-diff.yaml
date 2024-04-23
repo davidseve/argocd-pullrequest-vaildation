@@ -39,6 +39,7 @@ spec:
             exit 1
         fi
 
+        # Define the list of values
         cloud1="mov te"
         cloud2="mov"
 
@@ -46,7 +47,6 @@ spec:
         while IFS= read -r line; do
             # Extract the content before the first '/'
             application=$(echo "$line" | awk -F'/' '{print $1}')
-            # Define the list of values
 
             if echo $line | grep -q "/clusters/"; then
                 cluster_values=$(echo "$line" | awk -F'/clusters/' '{print tolower($2)}')
