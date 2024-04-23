@@ -26,10 +26,60 @@ spec:
           name: argocd-env-secret  # used for authentication (username/password or auth token)
   steps:
     - name: diff
-      image: quay.io/argoproj/argocd:$(params.argocd-version)
-      #TODO from git-diff.txt get all the application-name
-      
+      image: quay.io/argoproj/argocd:$(params.argocd-version)   
       script: |
+        rm -f $(workspaces.diff-result.path)/diff-output.txt
+        cat $(workspaces.source.path)/repository/git-diff.txt      
+        # Read the file path from the command line argument
+        file_path="$(workspaces.source.path)/repository/git-diff.txt"
+       
+        # Check if the file exists
+        if [ ! -f "$file_path" ]; then
+            echo "File $file_path not found."
+            exit 1
+        fi
+        # Read the content of the file
+        while IFS= read -r line; do
+            # Extract the content before the first '/'
+            application=$(echo "$line" | awk -F'/' '{print $1}')
+            # Define the list of values
+            cloud1="mov te"
+            cloud2="mov"
+
+            if echo $line | grep -q "/base/"; then
+                for value in $cloud1; do
+                    result="ocp-01-$value-$application"
+                    echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt
+                done
+                for value in $cloud2; do
+                    result="ocp-02-$value-$application"
+                    echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt
+                done
+            elif echo $line | grep -q "/overlays/"; then
+                cluster=$(echo "$line" | awk -F'/overlays/' '{print tolower($2)}')
+                cluster=$(echo "$cluster" | awk -F'/' '{print $1}')
+                result="$cluster-$application"
+                echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt
+            else                
+              for value in $cloud1; do
+                  # Check if the content contains the first pattern
+                  if echo $line | grep -q "/cloud-1/"; then
+                      result="ocp-01-$value-$application"
+                      echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt
+                  fi
+              done
+              for value in $cloud2; do
+                  if echo $line | grep -q "/cloud-2/"; then
+                      result="ocp-02-$value-$application"
+                      echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt
+                  fi
+              done
+            fi
+
+        done < "$file_path"
+
+        sort -u "$(workspaces.diff-result.path)/argocd-applications.txt" > "$(workspaces.diff-result.path)/argocd-applications_unique.txt"
+
         argocd_diff() {
             echo "Argo CD diff application=$1"
             local application="$1"
@@ -52,54 +102,9 @@ spec:
             
         }
 
-        rm -f $(workspaces.diff-result.path)/diff-output.txt
-        cat $(workspaces.source.path)/repository/git-diff.txt      
-        # Read the file path from the command line argument
-        file_path="$(workspaces.source.path)/repository/git-diff.txt"
-       
-        # Check if the file exists
-        if [ ! -f "$file_path" ]; then
-            echo "File $file_path not found."
-            exit 1
-        fi
-        # Read the content of the file
         while IFS= read -r line; do
-            # Extract the content before the first '/'
-            application=$(echo "$line" | awk -F'/' '{print $1}')
-            # Define the list of values
-            cloud1="mov te"
-            cloud2="te"
-
-            if echo $line | grep -q "/overlays/"; then
-                for value in $cloud1; do
-                    result="ocp-01-$value-$application"
-                    argocd_diff "$result"
-                done
-                for value in $cloud2; do
-                    result="ocp-02-$value-$application"
-                    argocd_diff "$result"
-                done
-            else
-              for value in $cloud1; do
-                  # Check if the content contains the first pattern
-                  if echo $line | grep -q "/cloud-1/"; then
-                      result="ocp-01-$value-$application"
-                      argocd_diff "$result"
-                  fi
-              done
-
-              for value in $cloud2; do
-                  if echo $line | grep -q "/cloud-2/"; then
-                      result="ocp-02-$value-$application"
-                      argocd_diff "$result"
-                  fi
-              done
-            fi
-
-        done < "$file_path"
-
-
-
+          argocd_diff $line
+        done < "$(workspaces.diff-result.path)/argocd-applications_unique.txt"
 
 
 
