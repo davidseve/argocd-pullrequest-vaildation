@@ -1,0 +1,97 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: pull-request-pipeline
+  namespace: ci  
+spec:
+  params:
+  - name: source-repo
+    description: A workspace that contains the fetched git repository.    
+    type: string
+  - name: revision
+    description: the revision to sync to
+    default: HEAD
+    type: string
+  workspaces:
+  - name: source-folder  
+  - name: diff-result
+
+
+  tasks:
+
+  - name: git-diff
+    taskRef:
+      name: git-cli
+      kind: ClusterTask
+    params:
+      - name: GIT_SCRIPT
+        value: |
+          rm -rf *
+          git config --global --add safe.directory /workspace/source 
+          git clone $(params.source-repo) repository
+          cd repository
+          git checkout $(params.revision)
+          git diff --name-only main..$(params.revision) > git-diff.txt
+    workspaces:
+    - name: source
+      workspace: source-folder
+
+  - name: argocd-task-diff
+    runAfter:
+    - git-diff  
+    taskRef:
+      kind: Task
+      name: argocd-task-diff
+    params:
+    - name: revision
+      value: $(params.revision)
+    workspaces:
+    - name: source
+      workspace: source-folder
+    - name: diff-result
+      workspace: diff-result
+
+  #TODO New task that update the PR with the contento of $(workspaces.diff-result.path)/diff-output.txt
+
+  - name: see-diff-result
+    runAfter:
+    - argocd-task-diff
+    taskSpec:
+      metadata: {}
+      steps:
+      - name: set-results
+        image: registry.access.redhat.com/ubi8/ubi-minimal:8.3
+        resources: {}
+        script: |
+          #!/usr/bin/env bash
+          cat $(workspaces.diff-result.path)/diff-output.txt
+      spec: null
+      workspaces:
+      - name: diff-result
+    workspaces:
+    - name: diff-result
+      workspace: diff-result
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: ci
+  name: workspace-pvc-diff-result
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: ci
+  name: workspace-pvc-source-folder
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
