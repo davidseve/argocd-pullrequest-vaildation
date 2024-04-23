@@ -3,7 +3,7 @@
   "cloud": "2",
   "cluster": {
       "name": "OCP-02-MOV",
-      "alias": "ocp-02-MOV",
+      "alias": "ocp-02-mov",
       "address": "https://kubernetes.default.svc"
   }
 }
