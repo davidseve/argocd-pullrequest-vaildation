@@ -5,4 +5,4 @@ metadata:
   labels:
     deployment: discounts  
 data:
-  application.colour: prod
+  application.colour: mov-1

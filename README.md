@@ -62,6 +62,4 @@ oc apply -f argocd/appset-discount-kustomize.yaml
 helm upgrade pipelines ./pullrequest/pipeline/ --set argocd.pass=AHLS5OPJv0cxTdhtlr6f2bQCeE1aWKYn --install
 ```
 
-tkn pipeline start pull-request-pipeli
-ne -n ci --param application-name=ocp-pro-01-discounts --param revision=diff --param source-repo=https://github.com/davidseve/argocd-example-application 
- --workspace name=diff-result,claimName=workspace-pvc-diff-result --workspace name=source-folder,claimName=workspace-pvc-source-folder
+tkn pipeline start pull-request-pipeline -n ci --param revision=diff --param source-repo=https://github.com/davidseve/argocd-example-application  --workspace name=diff-result,claimName=workspace-pvc-diff-result --workspace name=source-folder,claimName=workspace-pvc-source-folder
