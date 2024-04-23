@@ -1,0 +1,15 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    deployment: discounts
+  name: discounts
+spec:
+  port:
+    targetPort: 8080
+  to:
+    kind: Service
+    name: discounts
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

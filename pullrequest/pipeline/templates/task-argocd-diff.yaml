@@ -38,15 +38,28 @@ spec:
             echo "File $file_path not found."
             exit 1
         fi
+
+        cloud1="mov te"
+        cloud2="mov"
+
         # Read the content of the file
         while IFS= read -r line; do
             # Extract the content before the first '/'
             application=$(echo "$line" | awk -F'/' '{print $1}')
             # Define the list of values
-            cloud1="mov te"
-            cloud2="mov"
 
-            if echo $line | grep -q "/base/"; then
+
+            if echo $line | grep -q "/templates/"; then
+                for value in $cloud1; do
+                    result="ocp-01-$value-$application"
+                    echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt
+                done
+                for value in $cloud2; do
+                    result="ocp-02-$value-$application"
+                    echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt
+                done
+            #TODO add another if the change is in the Chart.yaml and/or values.yaml
+            elif echo $line | grep -q "/base/"; then
                 for value in $cloud1; do
                     result="ocp-01-$value-$application"
                     echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt
