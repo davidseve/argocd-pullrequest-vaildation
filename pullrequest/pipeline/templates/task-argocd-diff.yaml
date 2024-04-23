@@ -48,7 +48,12 @@ spec:
             application=$(echo "$line" | awk -F'/' '{print $1}')
             # Define the list of values
 
-            if echo $line | grep -q "/templates/"; then
+            if echo $line | grep -q "/clusters/"; then
+                cluster_values=$(echo "$line" | awk -F'/clusters/' '{print tolower($2)}')
+                cluster_name=$(sed 's/^value-\(.*\)\.yaml$/\1/' <<< $cluster_values)
+                result="$cluster_name-$application"
+                echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt
+            elif echo $line | grep -q "/templates/"; then
                 for value in $cloud1; do
                     result="ocp-01-$value-$application"
                     echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt

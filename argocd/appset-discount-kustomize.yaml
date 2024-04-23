@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: discounts
+  name: appset-discounts-kustomize
   namespace: openshift-gitops
 spec:
   generators:
@@ -15,7 +15,7 @@ spec:
   #  preserveResourcesOnDeletion: true
   template:
     metadata:
-      name: '{{cluster.alias}}-discounts'
+      name: '{{cluster.alias}}-discounts-kustomize'
       namespace: openshift-gitops
     spec:
       destination:
