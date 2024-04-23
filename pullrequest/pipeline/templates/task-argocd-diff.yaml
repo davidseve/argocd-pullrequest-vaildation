@@ -48,7 +48,6 @@ spec:
             application=$(echo "$line" | awk -F'/' '{print $1}')
             # Define the list of values
 
-
             if echo $line | grep -q "/templates/"; then
                 for value in $cloud1; do
                     result="ocp-01-$value-$application"
