@@ -1,0 +1,107 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: argocd-task-diff
+  namespace: ci  
+spec:
+  workspaces:
+    - name: diff-result
+    - name: source 
+  params:
+    - name: revision
+      description: the revision to sync to
+      default: HEAD
+      type: string
+    - name: flags
+      default: --
+      type: string
+    - name: argocd-version
+      default: v2.2.2 
+      type: string
+  stepTemplate:
+    envFrom:
+      - configMapRef:
+          name: argocd-env-configmap  # used for server address
+      - secretRef:
+          name: argocd-env-secret  # used for authentication (username/password or auth token)
+  steps:
+    - name: diff
+      image: quay.io/argoproj/argocd:$(params.argocd-version)
+      #TODO from git-diff.txt get all the application-name
+      
+      script: |
+        argocd_diff() {
+            echo "$1"
+            local application="$1"
+            if [ -z "$ARGOCD_AUTH_TOKEN" ]; then
+              yes | argocd login "$ARGOCD_SERVER" --username="$ARGOCD_USERNAME" --password="$ARGOCD_PASSWORD";
+            fi
+            set +e
+            argocd app diff $application --revision "$(params.revision)" "$(params.flags)" > $(workspaces.diff-result.path)/diff-output.txt 2>&1
+            local status=$?
+            echo $status
+            #TODO manage when argocd app diff return error
+            
+            if [ $status -eq 0 ] 
+            then 
+              echo "No diff is found" 
+            else 
+              cat $(workspaces.diff-result.path)/diff-output.txt
+              echo "Diff is found" >&2 
+            fi
+            
+        }
+
+        rm -f diff-output.txt
+        cat $(workspaces.source.path)/repository/git-diff.txt      
+        # Read the file path from the command line argument
+        file_path="$(workspaces.source.path)/repository/git-diff.txt"
+       
+        # Check if the file exists
+        if [ ! -f "$file_path" ]; then
+            echo "File $file_path not found."
+            exit 1
+        fi
+        # Read the content of the file
+        while IFS= read -r line; do
+            # Extract the content before the first '/'
+            application=$(echo "$line" | awk -F'/' '{print $1}')
+            # Define the list of values
+            cloud1="mov te"
+            cloud2="te"
+
+            for value in $cloud1; do
+                # Check if the content contains the first pattern
+                if echo $line | grep -q "/cloud-1/"; then
+                    result="ocp-01-$value-$application"
+                    argocd_diff "$result"
+                fi
+            done
+
+            for value in $cloud2; do
+            
+                if echo $line | grep -q "/cloud-2/"; then
+                    result="ocp-02-$value-$application"
+                    argocd_diff "$result"
+                fi
+
+            done
+
+        done < "$file_path"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

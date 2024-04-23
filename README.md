@@ -9,11 +9,6 @@ oc apply -f ./cluster-configuration
 ```
 Wait till both operators are installed
 
-For getting Argo CD admin pass:
-```
-oc extract secret/openshift-gitops-cluster -n openshift-gitops --to=-
-```
-
 ## Argo CD diff demo manual
 
 - Create an application in Argo CD
@@ -48,15 +43,25 @@ Get Argo CD server address and update the file pullrequest/pipeline/argocd-env-c
 oc -n openshift-gitops get route openshift-gitops-server -o jsonpath='{.spec.host}'
 ```
 
-Also update he file pullrequest/pipeline/argocd-env-secret.yaml with Argo CD user and password or token.
+Also update the file pullrequest/pipeline/argocd-env-secret.yaml with Argo CD user and password or token.
 
 Use this command to get admin password:
 ```
 oc extract secret/openshift-gitops-cluster -n openshift-gitops --to=-
 ```
 
+### Deploy application Set
+
+```
+oc apply -f argocd/appset-discount-kustomize.yaml
+```
+
 ### Deploy pipelines
 
 ```
-oc apply -f ./pullrequest/pipeline/
+helm upgrade pipelines ./pullrequest/pipeline/ --set argocd.pass=AHLS5OPJv0cxTdhtlr6f2bQCeE1aWKYn --install
 ```
+
+tkn pipeline start pull-request-pipeli
+ne -n ci --param application-name=ocp-pro-01-discounts --param revision=diff --param source-repo=https://github.com/davidseve/argocd-example-application 
+ --workspace name=diff-result,claimName=workspace-pvc-diff-result --workspace name=source-folder,claimName=workspace-pvc-source-folder

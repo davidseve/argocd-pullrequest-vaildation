@@ -4,4 +4,4 @@ metadata:
   name: argocd-env-configmap
   namespace: ci
 data:
-  ARGOCD_SERVER: openshift-gitops-server-openshift-gitops.apps-crc.testing
+  ARGOCD_SERVER: {{ .Values.argocd.server }}
