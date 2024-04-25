@@ -16,3 +16,4 @@ spec:
         image: registry.access.redhat.com/ubi8/ubi-minimal
         command: ["sh", "-c", "echo 'Service Account is working!'"]
       restartPolicy: Never
+  backoffLimit: 2
