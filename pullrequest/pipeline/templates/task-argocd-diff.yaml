@@ -30,6 +30,7 @@ spec:
       script: |
         rm -f $(workspaces.diff-result.path)/diff-output.txt
         rm -f $(workspaces.diff-result.path)/argocd-applications.txt
+        touch $(workspaces.diff-result.path)/argocd-applications.txt
         rm -f $(workspaces.diff-result.path)/argocd-applications-unique.txt
         cat $(workspaces.source.path)/repository/git-diff.txt      
         # Read the file path from the command line argument
@@ -41,6 +42,7 @@ spec:
             exit 1
         fi
         
+        #ArgoCD Login
         if [ -z "$ARGOCD_AUTH_TOKEN" ]; then
               yes | argocd login "$ARGOCD_SERVER" --username="$ARGOCD_USERNAME" --password="$ARGOCD_PASSWORD";
         fi
@@ -50,30 +52,22 @@ spec:
             application=$(echo "$line" | awk -F'/' '{print $1}')
             echo Application:$application
 
+            #HELM
             if echo $line | grep -q "/clusters/"; then
-                cluster_values=$(echo "$line" | awk -F'/clusters/' '{print tolower($2)}')
-                cluster_name=$(echo $cluster_values | sed 's/^values-\(.*\)\.yaml$/\1/')
-                result="$cluster_name-$application"
-                echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt
+                cluster_name=$(echo "$line" | awk -F'/clusters/' '{print tolower($2)}' | sed 's/^values-\(.*\)\.yaml$/\1/')
+                echo "$cluster_name-$application" >> $(workspaces.diff-result.path)/argocd-applications.txt
             elif echo $line | grep -q "/templates/" || echo $line | grep -q "/values.yaml" || echo $line | grep -q "/Chart.yaml"; then
                 argocd app list -o name -l app-config=$application >> $(workspaces.diff-result.path)/argocd-applications.txt
+
+            #KUSTOMIZE
             elif echo $line | grep -q "/base/"; then                
                 argocd app list -o name -l app-config=$application >> $(workspaces.diff-result.path)/argocd-applications.txt
             elif echo $line | grep -q "/overlays/"; then
-                cluster=$(echo "$line" | awk -F'/overlays/' '{print tolower($2)}')
-                cluster=$(echo "$cluster" | awk -F'/' '{print $1}')
-                result="$cluster-$application"
-                echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt
+                cluster=$(echo "$line" | awk -F'/overlays/' '{print tolower($2)}' | awk -F'/' '{print $1}')
+                echo "$cluster-$application" >> $(workspaces.diff-result.path)/argocd-applications.txt
             else 
-              #TODO use argocd app list here               
-              if echo $line | grep -q "/cloud-1/"; then
-                  argocd app list -o name -l app-config=$application -l cloud=cloud-1 >> $(workspaces.diff-result.path)/argocd-applications.txt
-              fi
-              
-              if echo $line | grep -q "/cloud-2/"; then
-                  argocd app list -o name -l app-config=$application -l cloud=cloud-2 >> $(workspaces.diff-result.path)/argocd-applications.txt
-              fi
-              
+                cloud=$(echo "$line" | awk -F'/' '{print $2}')           
+                argocd app list -o name -l app-config=$application -l cloud=$cloud >> $(workspaces.diff-result.path)/argocd-applications.txt
             fi
 
         done < "$file_path"
@@ -82,24 +76,22 @@ spec:
 
         argocd_diff() {
             #TODO get app status
-            echo "Argo CD diff application=$1"
             echo "Argo CD application=$1" >> $(workspaces.diff-result.path)/diff-output.txt
             local application="$1"
             set +e
             argocd app diff $application --revision "$(params.revision)" "$(params.flags)" >> $(workspaces.diff-result.path)/diff-output.txt 2>&1
             local status=$?
-            echo "Argo CD diff response=$status"
+            echo "Argo CD diff response=$status" >> $(workspaces.diff-result.path)/diff-output.txt
             #TODO manage when argocd app diff return error
             
             if [ $status -eq 0 ] 
             then 
-              echo "No diff is found"
               echo "No diff is found" >> $(workspaces.diff-result.path)/diff-output.txt
             else 
-              cat $(workspaces.diff-result.path)/diff-output.txt
               echo "Diff is found" >&2 
             fi
-            
+            echo "------------------------------------------------" >> $(workspaces.diff-result.path)/diff-output.txt
+            cat $(workspaces.diff-result.path)/diff-output.txt          
         }
 
         while IFS= read -r line; do

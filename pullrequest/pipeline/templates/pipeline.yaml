@@ -66,8 +66,7 @@ spec:
         resources: {}
         script: |
           #!/usr/bin/env bash
-          #TODO manage error No such file or directory
-          cat $(workspaces.diff-result.path)/diff-output.txt
+          cat $(workspaces.diff-result.path)/diff-output.txt 2>/dev/null || { echo 'There are not ArgoCD differences '; }
       spec: null
       workspaces:
       - name: diff-result
