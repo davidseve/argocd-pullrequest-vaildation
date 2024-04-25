@@ -1,6 +1,6 @@
 {
   "environment": "production",
-  "cloud": "cloud-1",
+  "cloud": "cloud-2",
   "cluster": {
       "name": "OCP-02-MOV",
       "alias": "ocp-02-mov",

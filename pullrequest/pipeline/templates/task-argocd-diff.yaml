@@ -40,10 +40,6 @@ spec:
             echo "File $file_path not found."
             exit 1
         fi
-
-        # Define the list of values
-        cloud1="mov te"
-        cloud2="mov"
         
         if [ -z "$ARGOCD_AUTH_TOKEN" ]; then
               yes | argocd login "$ARGOCD_SERVER" --username="$ARGOCD_USERNAME" --password="$ARGOCD_PASSWORD";
@@ -52,6 +48,7 @@ spec:
         while IFS= read -r line; do
             # Extract the content before the first '/'
             application=$(echo "$line" | awk -F'/' '{print $1}')
+            echo Application:$application
 
             if echo $line | grep -q "/clusters/"; then
                 cluster_values=$(echo "$line" | awk -F'/clusters/' '{print tolower($2)}')
@@ -60,7 +57,7 @@ spec:
                 echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt
             elif echo $line | grep -q "/templates/" || echo $line | grep -q "/values.yaml" || echo $line | grep -q "/Chart.yaml"; then
                 argocd app list -o name -l app-config=$application >> $(workspaces.diff-result.path)/argocd-applications.txt
-            elif echo $line | grep -q "/base/"; then
+            elif echo $line | grep -q "/base/"; then                
                 argocd app list -o name -l app-config=$application >> $(workspaces.diff-result.path)/argocd-applications.txt
             elif echo $line | grep -q "/overlays/"; then
                 cluster=$(echo "$line" | awk -F'/overlays/' '{print tolower($2)}')
@@ -70,17 +67,11 @@ spec:
             else 
               #TODO use argocd app list here               
               if echo $line | grep -q "/cloud-1/"; then
-                  for value in $cloud1; do                  
-                      result="ocp-01-$value-$application"
-                      echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt
-                  done
+                  argocd app list -o name -l app-config=$application -l cloud=cloud-1 >> $(workspaces.diff-result.path)/argocd-applications.txt
               fi
               
               if echo $line | grep -q "/cloud-2/"; then
-                  for value in $cloud2; do
-                      result="ocp-02-$value-$application"
-                      echo "$result" >> $(workspaces.diff-result.path)/argocd-applications.txt
-                  done
+                  argocd app list -o name -l app-config=$application -l cloud=cloud-2 >> $(workspaces.diff-result.path)/argocd-applications.txt
               fi
               
             fi
@@ -90,12 +81,10 @@ spec:
         sort -u "$(workspaces.diff-result.path)/argocd-applications.txt" > "$(workspaces.diff-result.path)/argocd-applications-unique.txt"
 
         argocd_diff() {
+            #TODO get app status
             echo "Argo CD diff application=$1"
             echo "Argo CD application=$1" >> $(workspaces.diff-result.path)/diff-output.txt
             local application="$1"
-            if [ -z "$ARGOCD_AUTH_TOKEN" ]; then
-              yes | argocd login "$ARGOCD_SERVER" --username="$ARGOCD_USERNAME" --password="$ARGOCD_PASSWORD";
-            fi
             set +e
             argocd app diff $application --revision "$(params.revision)" "$(params.flags)" >> $(workspaces.diff-result.path)/diff-output.txt 2>&1
             local status=$?

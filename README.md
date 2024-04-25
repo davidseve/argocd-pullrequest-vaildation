@@ -60,7 +60,7 @@ oc apply -f argocd/appset-discount-helm.yaml
 ### Deploy pipelines
 
 ```
-helm upgrade pipelines ./pullrequest/pipeline/ --set argocd.pass=<<ArgCD-password>> --install
+helm upgrade pipelines ./pullrequest/pipeline/ --set argocd.pass=<<ArgCD-password>> --set argocd.server=<<ArgCD-server>> --install
 ```
 
 ### Start pipeline

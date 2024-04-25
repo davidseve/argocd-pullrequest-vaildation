@@ -18,8 +18,8 @@ spec:
       name: '{{cluster.alias}}-discounts-kustomize'
       namespace: openshift-gitops
       labels: 
-        app-config: discounts-helm   
-        cloud: {{cloud}} 
+        app-config: discounts-kustomize   
+        cloud: '{{cloud}}'
     spec:
       destination:
         name: ''

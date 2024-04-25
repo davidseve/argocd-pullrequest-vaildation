@@ -19,7 +19,7 @@ spec:
       namespace: openshift-gitops
       labels: 
         app-config: discounts-helm
-        cloud: {{cloud}}
+        cloud: '{{cloud}}'
     spec:
       destination:
         name: ''
