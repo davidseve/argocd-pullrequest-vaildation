@@ -9,3 +9,5 @@ resources:
 - service.yaml
 - configMap.yaml
 - router.yaml
+- job-postSync.yaml
+
