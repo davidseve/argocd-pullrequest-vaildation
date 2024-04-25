@@ -1,6 +1,6 @@
 {
   "environment": "staging",
-  "cloud": "1",
+  "cloud": "cloud-1",
   "cluster": {
       "name": "OCP-01-TE",
       "alias": "ocp-01-te",

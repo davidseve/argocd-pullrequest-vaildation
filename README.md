@@ -54,12 +54,18 @@ oc extract secret/openshift-gitops-cluster -n openshift-gitops --to=-
 
 ```
 oc apply -f argocd/appset-discount-kustomize.yaml
+oc apply -f argocd/appset-discount-helm.yaml
 ```
 
 ### Deploy pipelines
 
 ```
-helm upgrade pipelines ./pullrequest/pipeline/ --set argocd.pass=AHLS5OPJv0cxTdhtlr6f2bQCeE1aWKYn --install
+helm upgrade pipelines ./pullrequest/pipeline/ --set argocd.pass=<<ArgCD-password>> --install
 ```
 
+### Start pipeline
+
+```
 tkn pipeline start pull-request-pipeline -n ci --param revision=diff --param source-repo=https://github.com/davidseve/argocd-example-application  --workspace name=diff-result,claimName=workspace-pvc-diff-result --workspace name=source-folder,claimName=workspace-pvc-source-folder
+```
+
