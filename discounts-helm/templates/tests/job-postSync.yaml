@@ -20,7 +20,7 @@ spec:
     metadata:
       name: service-account-validation
     spec:
-      serviceAccountName: my-service-account
+      serviceAccountName: my-service-account2
       containers:
       - name: validation-container
         image: registry.access.redhat.com/ubi8/ubi-minimal
