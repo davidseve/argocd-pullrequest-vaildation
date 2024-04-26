@@ -28,5 +28,5 @@ spec:
         command: ["sh", "-c", "echo 'Service Account is working!'"]
       restartPolicy: Never ##Does not work
       progressDeadlineSeconds: 10 ##Does not work
-      activeDeadlineSeconds: 10
+      startingDeadlineSeconds: 10
   backoffLimit: 2 ##Does not work
