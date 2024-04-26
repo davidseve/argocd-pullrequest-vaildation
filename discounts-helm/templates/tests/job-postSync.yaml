@@ -1,3 +1,4 @@
+{{- if .Values.tests.enable }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -33,3 +34,4 @@ spec:
         command: ["sh", "-c", "echo 'Service Account is working!'"]
         {{- end }}
   backoffLimit: 2 ##Does not work
+{{- end }}  

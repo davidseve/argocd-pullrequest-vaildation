@@ -1,4 +1,5 @@
 replicas: 1
 
 tests:
+  enable: false
   error: false
