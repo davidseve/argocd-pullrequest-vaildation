@@ -25,8 +25,7 @@ spec:
       containers:
       - name: validation-container
         image: registry.access.redhat.com/ubi8/ubi-minimal
-        command: ["sh", "-c", "echo 'Service Account is working!'"]
+        command: ["sh", "-c", "sleep 100'"]
       restartPolicy: Never ##Does not work
       progressDeadlineSeconds: 10 ##Does not work
-      startingDeadlineSeconds: 10
   backoffLimit: 2 ##Does not work
