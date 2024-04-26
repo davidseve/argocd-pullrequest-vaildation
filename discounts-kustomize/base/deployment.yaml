@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: discounts
-          image: quay.io/dseveria/discounts:v1.0.1
+          image: quay.io/dseveria/discounts:v1.0.0
           ports:
             - name: http
               containerPort: 8080
