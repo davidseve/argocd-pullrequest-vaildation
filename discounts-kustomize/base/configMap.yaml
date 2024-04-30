@@ -8,5 +8,5 @@ data:
   application.version: v1.0.1
   application.colour: black
   quarkus.log.level: debug
-  application.mode: online
+  application.mode: offline
 
