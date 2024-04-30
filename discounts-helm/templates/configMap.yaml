@@ -1,10 +1,10 @@
 apiVersion: v1
-kind: ConfigMape
+kind: ConfigMap
 metadata:
   name: {{ .Values.namePrefix }}discounts-configmap-env-base
   labels:
     deployment: discounts  
-data:
+data: {}
   application.version: v1.0.1
   application.colour: black
   quarkus.log.level: debug
