@@ -1,0 +1,40 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  name: delete
+  namespace: ci
+spec:
+  params:
+  # workspaces:
+  #   - name: user-ca-bundle
+  #     configmap:
+  #       name: user-ca-bundle
+
+  tasks:
+
+  - name: delete
+    # workspaces:
+    #   - name: user-ca-bundle
+    taskSpec:
+      metadata: {}
+      steps:
+        - name: diff
+          image: quay.io/argoproj/argocd:v2.2.2
+          script: |
+            ls
+            ls /etc
+            ls /etc/pki
+            ls /etc/pki/tls/certs
+          volumeMounts:
+          - mountPath: /etc/pki/tls/certs/ca-bundle.crt
+            name: user-ca-bundle
+            subPath: ca-bundle.crt
+      volumes:
+        - name: user-ca-bundle
+          configMap:
+            name: user-ca-bundle
+            # optional: true
+    # workspaces:
+    # - name: user-ca-bundle
+    #   workspace: user-ca-bundle
+
