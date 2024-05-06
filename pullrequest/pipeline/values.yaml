@@ -1,7 +1,8 @@
 argocd:
-  server: openshift-gitops-server-openshift-gitops.apps.cluster-c55h6.dynamic.redhatworkshops.io
+  server: openshift-gitops-server.openshift-gitops.svc.cluster.local
   user: admin
   pass: change_me
+  token: change_me  
 
 github:
   user: davidseve

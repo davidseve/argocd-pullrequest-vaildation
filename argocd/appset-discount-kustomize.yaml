@@ -11,8 +11,6 @@ spec:
       revision: HEAD
       files:
       - path: "cluster-definition/**/cluster.json"
-  #syncPolicy:
-  #  preserveResourcesOnDeletion: true
   template:
     metadata:
       name: '{{cluster.alias}}-discounts-kustomize'

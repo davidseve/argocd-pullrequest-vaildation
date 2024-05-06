@@ -42,32 +42,29 @@ spec:
             exit 1
         fi
         
-        #ArgoCD Login
-        if [ -z "$ARGOCD_AUTH_TOKEN" ]; then
-              yes | argocd login "$ARGOCD_SERVER" --username="$ARGOCD_USERNAME" --password="$ARGOCD_PASSWORD";
-        fi
         # Read the content of the file
         while IFS= read -r line; do
             # Extract the content before the first '/'
             application=$(echo "$line" | awk -F'/' '{print $1}')
             echo Application:$application
 
+
             #HELM
             if echo $line | grep -q "/clusters/"; then
                 cluster_name=$(echo "$line" | awk -F'/clusters/' '{print tolower($2)}' | sed 's/^values-\(.*\)\.yaml$/\1/')
                 echo "$cluster_name-$application" >> $(workspaces.diff-result.path)/argocd-applications.txt
             elif echo $line | grep -q "/templates/" || echo $line | grep -q "/values.yaml" || echo $line | grep -q "/Chart.yaml"; then
-                argocd app list -o name -l app-config=$application >> $(workspaces.diff-result.path)/argocd-applications.txt
+                argocd app list -o name -l app-config=$application --insecure >> $(workspaces.diff-result.path)/argocd-applications.txt
 
             #KUSTOMIZE
             elif echo $line | grep -q "/base/"; then                
-                argocd app list -o name -l app-config=$application >> $(workspaces.diff-result.path)/argocd-applications.txt
+                argocd app list -o name -l app-config=$application --insecure >> $(workspaces.diff-result.path)/argocd-applications.txt
             elif echo $line | grep -q "/overlays/"; then
                 cluster=$(echo "$line" | awk -F'/overlays/' '{print tolower($2)}' | awk -F'/' '{print $1}')
                 echo "$cluster-$application" >> $(workspaces.diff-result.path)/argocd-applications.txt
             else 
                 cloud=$(echo "$line" | awk -F'/' '{print $2}')           
-                argocd app list -o name -l app-config=$application -l cloud=$cloud >> $(workspaces.diff-result.path)/argocd-applications.txt
+                argocd app list -o name -l app-config=$application -l cloud=$cloud --insecure >> $(workspaces.diff-result.path)/argocd-applications.txt
             fi
 
         done < "$file_path"
@@ -79,16 +76,18 @@ spec:
             echo "Argo CD application=$1" >> $(workspaces.diff-result.path)/diff-output.txt
             local application="$1"
             set +e
-            argocd app diff $application --revision "$(params.revision)" "$(params.flags)" >> $(workspaces.diff-result.path)/diff-output.txt 2>&1
+            argocd app diff $application --insecure --revision "$(params.revision)" "$(params.flags)" >> $(workspaces.diff-result.path)/diff-output.txt 2>&1
             local status=$?
             echo "Argo CD diff response=$status" >> $(workspaces.diff-result.path)/diff-output.txt
-            #TODO manage when argocd app diff return error
             
             if [ $status -eq 0 ] 
             then 
               echo "No diff is found" >> $(workspaces.diff-result.path)/diff-output.txt
-            else 
+            elif [ $status -eq 1 ]
+            then
               echo "Diff is found" >&2 
+            else 
+              echo "Argo CD diff error"
             fi
             echo "------------------------------------------------" >> $(workspaces.diff-result.path)/diff-output.txt
             cat $(workspaces.diff-result.path)/diff-output.txt          
