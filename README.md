@@ -67,7 +67,7 @@ tkn pipeline start pull-request-pipeline -n ci --param revision=diff --param sou
 ## Argo CD diff manual
 
 - Create an application in Argo CD
-- Create a new branch called diff-branch
+- Create a new branch called diff
 - Change the number of replicas in staging deployment.yaml
 - Commit and push changed to diff-branch
 
