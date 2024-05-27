@@ -1,0 +1,137 @@
+---
+- name: Deploy ArgoCD Cluster in OpenShift
+  hosts: localhost
+  # Externalizar estas variables
+  # export OCP_URL='https://console-openshift-console.apps.cluster-k2gfd.dynamic.redhatworkshops.io'
+  # export OPENSHIFT_USERNAME='your_username'
+  # export OPENSHIFT_PASSWORD='your_password'
+  # export KUBECONFIG='/path/to/your/kubeconfig'  # Esta variable debe apuntar a tu archivo de configuración de kubectl
+  vars:
+    ocp_url: 'https://api.cluster-8cpc2.dynamic.redhatworkshops.io:6443'
+     # Asume que OCP_URL está configurada como variable de entorno
+    # ocp_url: "{{ lookup('env', 'OCP_URL') }}" 
+    ocp_namespace: "telefonica"
+    operators_namespace: "openshift-operators"
+  tasks:
+    - name: Login to OpenShift
+      redhat.openshift.openshift_auth:
+        host: "{{ ocp_url }}"
+        # username: "{{ lookup('env', 'OPENSHIFT_USERNAME') }}"
+        username: "admin"
+        # password: "{{ lookup('env', 'OPENSHIFT_PASSWORD') }}"
+        password: "MTY5Njgy"
+        validate_certs: false
+
+    - name: Create Telefonica namespace
+      redhat.openshift.k8s:
+        state: present
+        definition:
+          apiVersion: v1
+          kind: Namespace
+          metadata:
+            name: "{{ ocp_namespace }}"
+
+    - name: Install Openshift Pipeline y Openshift GitOps
+      ansible.builtin.command: "oc apply -f ../cluster-configuration"
+      register: apply_output
+      
+    - name: Debug apply output
+      ansible.builtin.debug:
+        var: apply_output.stdout
+
+    - name: Wait for GitOps Operator to be ready
+      kubernetes.core.k8s_info:
+        api_version: apps/v1
+        kind: Deployment
+        namespace: "{{ operators_namespace }}"
+        name: "openshift-gitops-operator-controller-manager"
+      register: gitops_operator
+      # La primera ejecución falla: revisar la condición 'until'
+      until: gitops_operator.resources[0].status.availableReplicas > 0
+      retries: 30
+      delay: 30
+      
+    - name: Debug status GitOps Operator variable
+      ansible.builtin.debug:
+        var: gitops_operator.resources[0].status.availableReplicas
+
+    - name: Wait for Pipeline Operator to be ready
+      kubernetes.core.k8s_info:
+        api_version: apps/v1
+        kind: Deployment
+        namespace: "{{ operators_namespace }}"
+        name: "openshift-pipelines-operator"
+      register: pipelines_operator
+      until: pipelines_operator.resources[0].status.availableReplicas > 0
+      retries: 30
+      delay: 10
+      
+    - name: Debug status Pipeline Operator variable
+      ansible.builtin.debug:
+        var: pipelines_operator.resources[0].status # .availableReplicas
+
+    # ------------------------------------------------ #
+    - name: Configure Argo CD instance
+      ansible.builtin.command: "oc apply -f ../argocd-configuration"
+      register: argocd_configuration_output
+      
+    - name: Debug apply output
+      ansible.builtin.debug:
+        var: argocd_configuration_output.stdout
+
+    - name: Get ArgoCD Server
+      ansible.builtin.command: "oc -n openshift-gitops get route openshift-gitops-server -o jsonpath='{.spec.host}'"
+      register: argocd_host_output
+      
+    - name: Debug ArgoCD Server output
+      ansible.builtin.debug:
+        var: argocd_host_output.stdout
+
+    - name: Get ArgoCD admin credentials
+      ansible.builtin.command: "oc extract secret/openshift-gitops-cluster -n openshift-gitops --to=-"
+      register: argocd_pass
+      
+    - name: Debug ArgoCD credentials
+      ansible.builtin.debug:
+        var: argocd_pass.stdout
+
+    - name: Generate a new token for the account pipeline-account
+      ansible.builtin.command: "argocd login {{ argocd_host_output.stdout }} --username admin --password {{ argocd_pass.stdout }} --insecure"
+      register: argocd_token_output
+      
+    - name: Debug ArgoCD credentials
+      ansible.builtin.debug:
+        var: argocd_token_output.stdout
+
+    - name: Generate a new token for the account pipeline-account
+      ansible.builtin.command: "argocd account generate-token --account pipeline-account"
+      register: argocd_token_created_output
+      
+    - name: Debug ArgoCD credentials
+      ansible.builtin.debug:
+        var: argocd_token_created_output.stdout
+
+    # ------------------------------------------------ #
+    - name: Deploy pipelines
+      ansible.builtin.command: "helm upgrade pipelines ../pullrequest/pipeline/ --install --set argocd.token={{ argocd_token_created_output }}"
+      register: helm_output
+      
+    - name: Debug pipelines
+      ansible.builtin.debug:
+        var: helm_output.stdout
+
+    - name: Deploy application Set
+      ansible.builtin.command: "oc apply -f ../argocd/appset-discount-kustomize.yaml -n {{ ocp_namespace }}"
+      register: app_set_output
+      
+    - name: Debug Application Set
+      ansible.builtin.debug:
+        var: app_set_output.stdout
+
+    - name: Deploy application Set 2
+      ansible.builtin.command: "oc apply -f ../argocd/appset-discount-helm.yaml"
+      register: app_set_output
+      
+    - name: Debug Application Set 2
+      ansible.builtin.debug:
+        var: app_set_output.stdout
