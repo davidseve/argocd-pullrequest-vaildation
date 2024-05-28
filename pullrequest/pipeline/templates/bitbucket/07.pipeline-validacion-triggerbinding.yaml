@@ -1,0 +1,11 @@
+# hello-world-triggerbinding.yaml
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  # name: hello-world-triggerbinding
+  name: pipeline-validacion-triggerbinding
+spec:
+  params:
+    - name: message
+      value: "Hello world!"
+

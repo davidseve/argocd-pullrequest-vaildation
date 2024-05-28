@@ -1,0 +1,21 @@
+# hello-world-triggertemplate.yaml
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  # name: hello-world-triggertemplate
+  name: pipeline-validacion-triggertemplate
+spec:
+  resourcetemplates:
+    - apiVersion: tekton.dev/v1beta1
+      kind: PipelineRun
+      metadata:
+        # generateName: hello-world-pipelinerun-
+        generateName: pipeline-validacion-pipelinerun-
+      spec:
+        pipelineRef:
+          # name: hello-world-pipeline
+          name: pipeline-validacion-pipeline
+        params:
+          - name: message
+            value: "$(params.message)"
+

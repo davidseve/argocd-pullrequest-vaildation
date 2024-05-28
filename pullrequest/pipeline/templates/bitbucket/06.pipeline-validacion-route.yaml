@@ -1,0 +1,19 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  annotations:
+    openshift.io/host.generated: "true"
+  # name: el-hello-world
+  name: el-pipeline-validacion
+  namespace: telefonica
+spec:
+  # host: el-hello-world-telefonica.apps.cluster-8cpc2.dynamic.redhatworkshops.io
+  host: el-pipeline-validacion-telefonica.apps.cluster-8cpc2.dynamic.redhatworkshops.io
+  port:
+    targetPort: 8080
+  to:
+    kind: Service
+    # name: el-hello-world
+    name: el-pipeline-validacion
+    weight: 100
+  wildcardPolicy: None
