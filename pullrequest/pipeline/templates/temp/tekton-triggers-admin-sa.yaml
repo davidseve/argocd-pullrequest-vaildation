@@ -1,0 +1,6 @@
+# tekton-triggers-admin-sa.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tekton-triggers-admin
+

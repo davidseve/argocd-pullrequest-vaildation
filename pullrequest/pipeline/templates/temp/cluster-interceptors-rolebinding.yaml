@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: cluster-interceptors-rolebinding
+subjects:
+  - kind: ServiceAccount
+    name: tekton-triggers-admin
+    namespace: telefonica
+roleRef:
+  kind: ClusterRole
+  name: cluster-interceptors-role
+  apiGroup: rbac.authorization.k8s.io
+

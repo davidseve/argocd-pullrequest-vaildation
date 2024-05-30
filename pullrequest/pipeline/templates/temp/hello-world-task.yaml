@@ -1,0 +1,12 @@
+# hello-world-task.yaml
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: hello-world-task
+spec:
+  steps:
+    - name: echo
+      image: alpine
+      script: |
+        echo "Hello world!"
+

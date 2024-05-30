@@ -1,0 +1,14 @@
+# hello-world-eventlistener-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: el-hello-world
+spec:
+  type: ClusterIP
+  selector:
+    eventlistener: hello-world-eventlistener
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+
