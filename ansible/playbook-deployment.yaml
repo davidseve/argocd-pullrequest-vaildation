@@ -99,6 +99,19 @@
     - name: Show retult of Pod deleted
       ansible.builtin.debug:
         var: pod_deleted.stdout
+
+    # 
+    # Verification: in each of the following commands we must receive a 'yes' response, which would 
+    # confirm that the permissions were granted correctly.
+    # 
+    # ```
+    # oc auth can-i get clusterinterceptors --as system:serviceaccount:telefonica:tekton-triggers-admin
+    # oc auth can-i list clusterinterceptors --as system:serviceaccount:telefonica:tekton-triggers-admin
+    # oc auth can-i watch clusterinterceptors --as system:serviceaccount:telefonica:tekton-triggers-admin
+    # ```
+
+
+
     # # ------------------------------------------------ #
     # - name: Configure Argo CD instance
     #   ansible.builtin.command: "oc apply -f ../argocd-configuration"
