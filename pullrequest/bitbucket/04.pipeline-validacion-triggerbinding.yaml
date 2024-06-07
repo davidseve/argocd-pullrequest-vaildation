@@ -10,3 +10,5 @@ spec:
       value: $(body.repository.links.html.href)
     - name: pr_id
       value: $(body.pullrequest.id)
+    - name: repo_full_name
+      value: $(body.repository.full_name)

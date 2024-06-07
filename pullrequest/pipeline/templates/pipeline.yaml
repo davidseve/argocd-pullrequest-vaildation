@@ -16,6 +16,9 @@ spec:
     description: Pullrequest ID
     type: string
     default: '1'
+  - name: repo_full_name
+    type: string
+    default: 'repo-full-name'
   workspaces:
   - name: source-folder  
   - name: diff-result
@@ -69,6 +72,9 @@ spec:
         - name: pr_id
           type: string
           default: '1'
+        - name: repo_full_name
+          type: string
+          default: 'repo-full-name'
       steps:
       - name: set-results
         image: registry.access.redhat.com/ubi8/ubi-minimal:8.3
@@ -78,17 +84,16 @@ spec:
 
           pr_id=$(params.pr_id)
           comment_content=$(< $(workspaces.source-folder.path)/repository/git-diff.txt)
+          repo_full_name=$(params.repo_full_name)
 
           # VARIABLES
           access_token=<your-repo-access-token>
-          repo_workspace="telef-testing"
-          repo_slug="repo-testing1"
-
+          
           echo "Adding diff to PR ID '${pr_id}', comment: ${comment_content}";
           curl -X POST -H "Authorization: Bearer ${access_token}" \
           -H "Content-Type: application/json" \
           -d '{"content": {"raw": "Diff result: '"${comment_content}"'"}}' \
-          "https://api.bitbucket.org/2.0/repositories/${repo_workspace}/${repo_slug}/pullrequests/${pr_id}/comments"
+          "https://api.bitbucket.org/2.0/repositories/${repo_full_name}/pullrequests/${pr_id}/comments"
       spec: null
     workspaces:
     - name: diff-result

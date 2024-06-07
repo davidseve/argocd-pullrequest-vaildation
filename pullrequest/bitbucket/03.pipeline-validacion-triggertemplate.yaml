@@ -18,6 +18,8 @@ spec:
             value: $(tt.params.revision)
           - name: pr_id
             value: $(tt.params.pr_id)
+          - name: repo_full_name
+            value: $(tt.params.repo_full_name)
         workspaces:
           - name: source-folder
             persistentVolumeClaim:
@@ -29,3 +31,4 @@ spec:
     - name: source-repo
     - name: revision
     - name: pr_id
+    - name: repo_full_name
