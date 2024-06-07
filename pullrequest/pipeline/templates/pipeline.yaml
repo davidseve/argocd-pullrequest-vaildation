@@ -12,6 +12,10 @@ spec:
     description: the revision to sync to
     default: HEAD
     type: string
+  - name: pr_id
+    description: Pullrequest ID
+    type: string
+    default: '1'
   workspaces:
   - name: source-folder  
   - name: diff-result
@@ -56,39 +60,42 @@ spec:
     - name: diff-result
       workspace: diff-result
 
-  #TODO New task that update the PR with the contento of $(workspaces.diff-result.path)/diff-output.txt
   - name: add-pr-comment
     runAfter:
     - argocd-task-diff
     taskSpec:
       metadata: {}
+      params:
+        - name: pr_id
+          type: string
+          default: '1'
       steps:
       - name: set-results
         image: registry.access.redhat.com/ubi8/ubi-minimal:8.3
         resources: {}
-        # script: |
-        #   #!/usr/bin/env bash
-        #   cat $(workspaces.diff-result.path)/diff-output.txt 2>/dev/null || { echo 'There are not ArgoCD differences '; }
         script: |
           #!/usr/bin/env bash
 
+          pr_id=$(params.pr_id)
           comment_content=$(< $(workspaces.source-folder.path)/repository/git-diff.txt)
 
           # VARIABLES
-          pr_id=40
           access_token=<your-repo-access-token>
+          repo_workspace="telef-testing"
+          repo_slug="repo-testing1"
 
-          echo "Adding diff to PR's comment: ${comment_content}";
+          echo "Adding diff to PR ID '${pr_id}', comment: ${comment_content}";
           curl -X POST -H "Authorization: Bearer ${access_token}" \
           -H "Content-Type: application/json" \
           -d '{"content": {"raw": "Diff result: '"${comment_content}"'"}}' \
-          "https://api.bitbucket.org/2.0/repositories/telef-testing/repo-testing1/pullrequests/${pr_id}/comments"
+          "https://api.bitbucket.org/2.0/repositories/${repo_workspace}/${repo_slug}/pullrequests/${pr_id}/comments"
       spec: null
     workspaces:
     - name: diff-result
       workspace: diff-result
     - name: source-folder
       workspace: source-folder
+
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

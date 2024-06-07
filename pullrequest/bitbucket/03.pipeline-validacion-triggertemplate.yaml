@@ -1,24 +1,23 @@
 apiVersion: triggers.tekton.dev/v1alpha1
 kind: TriggerTemplate
 metadata:
-  # name: pipeline-validacion-triggertemplate
   name: pull-request-pipeline-triggertemplate
 spec:
   resourcetemplates:
     - apiVersion: tekton.dev/v1beta1
       kind: PipelineRun
       metadata:
-        # generateName: pipeline-validacion-pipelinerun-
         generateName: pull-request-pipelinerun-
       spec:
         pipelineRef:
-          # name: pipeline-validacion-pipeline
           name: pull-request-pipeline
         params:
           - name: source-repo
             value: $(tt.params.source-repo)
           - name: revision
             value: $(tt.params.revision)
+          - name: pr_id
+            value: $(tt.params.pr_id)
         workspaces:
           - name: source-folder
             persistentVolumeClaim:
@@ -29,3 +28,4 @@ spec:
   params:
     - name: source-repo
     - name: revision
+    - name: pr_id

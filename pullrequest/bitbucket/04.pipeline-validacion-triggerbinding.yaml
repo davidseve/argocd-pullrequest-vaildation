@@ -6,7 +6,7 @@ spec:
   params:
     - name: revision
       value: $(body.pullrequest.source.branch.name)
-      # value: "algo"
     - name: source-repo
       value: $(body.repository.links.html.href)
-      # value: "algun-repo"
+    - name: pr_id
+      value: $(body.pullrequest.id)
