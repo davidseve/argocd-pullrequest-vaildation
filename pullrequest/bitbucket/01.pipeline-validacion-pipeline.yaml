@@ -1,9 +1,8 @@
-# hello-world-pipeline.yaml
 apiVersion: tekton.dev/v1beta1
 kind: Pipeline
 metadata:
-  # name: hello-world-pipeline
-  name: pipeline-validacion-pipeline
+  # name: pipeline-validacion-pipeline
+  name: pull-request-pipeline
 spec:
   tasks:
     # - name: hello-world-task

@@ -1,9 +1,0 @@
-# hello-world-pipelinerun.yaml
-apiVersion: tekton.dev/v1beta1
-kind: PipelineRun
-metadata:
-  name: hello-world-pipelinerun
-spec:
-  pipelineRef:
-    name: hello-world-pipeline
-

@@ -1,0 +1,14 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: EventListener
+metadata:
+  name: pull-request-pipeline-eventlistener
+spec:
+  triggers:
+    - name: pull-request-pipeline-trigger
+      bindings:
+        - ref: pipeline-validacion-triggerbinding
+        # - ref: pull-request-pipeline-triggerbinding
+      template:
+        ref: pull-request-pipeline-triggertemplate
+  serviceAccountName: pipeline
+

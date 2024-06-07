@@ -4,8 +4,10 @@ metadata:
   name: cluster-interceptors-rolebinding
 subjects:
   - kind: ServiceAccount
-    name: tekton-triggers-admin
-    namespace: telefonica
+    # name: tekton-triggers-admin
+    name: pipeline
+    # namespace: my-namespace
+    namespace: ci
 roleRef:
   kind: ClusterRole
   name: cluster-interceptors-role

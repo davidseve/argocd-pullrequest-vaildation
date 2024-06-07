@@ -1,7 +1,8 @@
 apiVersion: tekton.dev/v1beta1
 kind: Task
 metadata:
-  name: pipeline-validacion-task
+  # name: pipeline-validacion-task
+  name: pull-request-pipeline
 spec:
   steps:
     - name: echo

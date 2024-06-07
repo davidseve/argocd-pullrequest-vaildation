@@ -2,13 +2,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  #name: el-hello-world
-  name: el-pipeline-validacion
+  # name: el-pipeline-validacion
+  name: el-pull-request-pipeline
 spec:
   type: ClusterIP
   selector:
-    # eventlistener: hello-world-eventlistener
-    eventlistener: pipeline-validacion-eventlistener
+    # eventlistener: pipeline-validacion-eventlistener
+    eventlistener: pull-request-pipeline-eventlistener
   ports:
     - protocol: TCP
       port: 8080
