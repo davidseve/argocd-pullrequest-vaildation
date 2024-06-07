@@ -33,6 +33,9 @@ spec:
           git checkout $(params.revision)
           rm -f git-diff.txt
           git diff --name-only main..$(params.revision) > git-diff.txt
+
+          pwd
+          ls -la git-diff.txt
           cat git-diff.txt
     workspaces:
     - name: source
@@ -54,8 +57,7 @@ spec:
       workspace: diff-result
 
   #TODO New task that update the PR with the contento of $(workspaces.diff-result.path)/diff-output.txt
-
-  - name: see-diff-result
+  - name: add-pr-comment
     runAfter:
     - argocd-task-diff
     taskSpec:
@@ -64,15 +66,29 @@ spec:
       - name: set-results
         image: registry.access.redhat.com/ubi8/ubi-minimal:8.3
         resources: {}
+        # script: |
+        #   #!/usr/bin/env bash
+        #   cat $(workspaces.diff-result.path)/diff-output.txt 2>/dev/null || { echo 'There are not ArgoCD differences '; }
         script: |
           #!/usr/bin/env bash
-          cat $(workspaces.diff-result.path)/diff-output.txt 2>/dev/null || { echo 'There are not ArgoCD differences '; }
+
+          comment_content=$(< $(workspaces.source-folder.path)/repository/git-diff.txt)
+
+          # VARIABLES
+          pr_id=40
+          access_token=<your-repo-access-token>
+
+          echo "Adding diff to PR's comment: ${comment_content}";
+          curl -X POST -H "Authorization: Bearer ${access_token}" \
+          -H "Content-Type: application/json" \
+          -d '{"content": {"raw": "Diff result: '"${comment_content}"'"}}' \
+          "https://api.bitbucket.org/2.0/repositories/telef-testing/repo-testing1/pullrequests/${pr_id}/comments"
       spec: null
-      workspaces:
-      - name: diff-result
     workspaces:
     - name: diff-result
       workspace: diff-result
+    - name: source-folder
+      workspace: source-folder
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
