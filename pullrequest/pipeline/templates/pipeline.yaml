@@ -78,6 +78,12 @@ spec:
       steps:
       - name: set-results
         image: registry.access.redhat.com/ubi8/ubi-minimal:8.3
+        env:
+          - name: TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: repo-access-token-secret
+                key: token
         resources: {}
         script: |
           #!/usr/bin/env bash
@@ -86,14 +92,21 @@ spec:
           comment_content=$(< $(workspaces.source-folder.path)/repository/git-diff.txt)
           repo_full_name=$(params.repo_full_name)
 
-          # VARIABLES
-          access_token=<your-repo-access-token>
+          # PENDING-TO-RESOLVE: TOKEN hardcoded works, from Secret not.
+          access_token="$TOKEN";
           
+          echo "----TOKEN: $TOKEN";
+          echo "----access_token: ${access_token}";
+
           echo "Adding diff to PR ID '${pr_id}', comment: ${comment_content}";
+
+          # curl -X POST -H "Authorization: Bearer $TOKEN" \
           curl -X POST -H "Authorization: Bearer ${access_token}" \
-          -H "Content-Type: application/json" \
-          -d '{"content": {"raw": "Diff result: '"${comment_content}"'"}}' \
-          "https://api.bitbucket.org/2.0/repositories/${repo_full_name}/pullrequests/${pr_id}/comments"
+            -H "Content-Type: application/json" \
+            -d '{"content": {"raw": "Diff result: '"${comment_content}"'"}}' \
+            "https://api.bitbucket.org/2.0/repositories/${repo_full_name}/pullrequests/${pr_id}/comments" \
+            --verbose
+
       spec: null
     workspaces:
     - name: diff-result
