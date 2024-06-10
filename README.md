@@ -92,41 +92,12 @@ Out put should be like this:
 
 ## Bitbucket: webhook integration
 
-To trigger the execution of a pipeline from the creation of a pull request (PR), it is necessary to create a serie of objects in our Openshift cluster.
 
-In order to have a simplified process we provide an Ansible Playbook to create all necessary objects.
-This playbook is based on the use of several 'oc' commands. So, if you prefer you can run those commands manually.
+### Prerequisites:
 
-We must execute the following command:
+- Add a webhook in your Bitbucket repository
 
-1. Run the 'oc login' command to be connected in the OCP cluster:
-```
-oc login --token=ADMIN_USER_TOKEN --server=https://API-CLLUSTER-URL:6443
-```
-
-2. Export these environment variables:
-
-```
-export OCP_URL='https://api.cluster-jpd27.dynamic.redhatworkshops.io:6443/'
-export OPENSHIFT_USERNAME='your_username'  // User should be cluster admin
-export OPENSHIFT_PASSWORD='your_password'  // Password
-```
-
-3. Run the playbook as follows:
-```
-ansible-playbook ./ansible/playbook-deployment.yaml
-```
-
-This will create all objects described in ./pullrequest/pipeline/templates/bitbucket folder.
-
-An important info is shown in the output. Pay attention on message 'URL del Webhook (en Bitbucket) debe ser:' and copy that: 
-
-
-![URL for Bitbucket webhook](images/01.bitbucket-url.png)
-
-
-
-Then, go to Bitbucket admin console to create a webhook.
+Go to Bitbucket admin console to create a webhook.
 
 1. Go to your *Repository* / *Repository settings* and select *'Webhooks'*
 
@@ -136,20 +107,80 @@ Then, go to Bitbucket admin console to create a webhook.
 2. Click on *'Add webhook'* and complete the following data:
 
 - Title:
-- URL: here you should copy the URL you copy from execution of Ansible Playbook (step 3)
+- URL: You can change this value later, with the route created in Openshift.
 - Triggers:
     - Unselect 'Push' (Repository list)
     - Select 'Created' (Pull request list)
 
-and save the changes.
+> **_NOTE:_**  YOU HAVE A BUTTON TO COPY THE SECRET YOU WILL NEED TO CREATE LATER IN OPENSHIFT: PLEASE CLICK IT.
 
 
-![New webhook](images/03.bitbucket-new_webhook.png)
+![New webhook](images/03.01.bitbucket-new_webhook.png)
 
+Select the option 'Pull request' => 'Created'. This will trigger the execution of the webhook only when a PR is created.
 
 ![Webhook PR](images/04.bitbucket-webhook_PR.png)
 
-3. Finally, when you make a change and commit in your repository, select the 'Create a pull request for this change' option
+Finally save the changes.
+
+
+
+### Objects:
+
+To trigger the execution of a pipeline from the creation of a pull request (PR), it is necessary to create a serie of objects in our Openshift cluster.
+These objects are created with command run previuously 'helm upgrade pipelines ...'
+You should to update some values:
+
+- Secret:
+
+    The secret generated when Webhooks was created in Bitbucket console (step 2).
+    You should to update file 'pullrequest/pipeline/templates/pull-request-pipeline-repo-access-token-secret.yaml' with that information.
+
+    ```
+    data:
+        token: CHANGE_ME
+    ```
+
+- Route: 
+
+    It will be invoked from webhook execution.
+    File: pullrequest/pipeline/templates/pull-request-pipeline-eventlistener-route.yaml
+
+    ```
+    kind: Route
+    metadata:
+    annotations:
+        openshift.io/host.generated: "true"
+    name: el-pull-request-pipeline
+    namespace: ci
+    spec:
+        host: change_me
+        # EXAMPLE
+        # host: el-pull-request-pipeline-eventlistener-ci.apps.cluster-49lc7.dynamic.redhatworkshops.io
+    ```
+
+- EventListenerService: NO CHANGES REQUIRED
+    (pullrequest/pipeline/templates/pull-request-pipeline-eventlistener-service.yaml)
+
+- EventListener: NO CHANGES REQUIRED
+    (pullrequest/pipeline/templates/pull-request-pipeline-eventlistener.yaml) 
+
+- TriggerBinding: NO CHANGES REQUIRED 
+    (pullrequest/pipeline/templates/pull-request-pipeline-triggerbinding.yaml) 
+
+- TriggerTemplate: NO CHANGES REQUIRED
+    (pullrequest/pipeline/templates/pull-request-pipeline-triggertemplate.yaml)
+
+
+Once these objects were modified, run again this command: 
+
+```
+helm upgrade pipelines ./pullrequest/pipeline/ --install --set argocd.token=<<ArgCD-token>>
+```
+
+From this moment, when a PR is CREATED in your Bitbucket repository, a new PipelineRun wil be created as follows: 
+
+Remember to select the 'Create a pull request for this change' option
 
 ![Commit changes](images/05.bitbucket-webhook_commit.png)
 
