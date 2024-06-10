@@ -6,8 +6,6 @@ metadata:
   name: el-pull-request-pipeline
   namespace: ci
 spec:
-  host: el-pull-request-pipeline-eventlistener-ci.apps.cluster-49lc7.dynamic.redhatworkshops.io
-  # host: change_me
   port:
     targetPort: 8080
   to:
