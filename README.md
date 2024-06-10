@@ -129,7 +129,8 @@ Finally save the changes.
 
 To trigger the execution of a pipeline from the creation of a pull request (PR), it is necessary to create a serie of objects in our Openshift cluster.
 These objects are created with command run previuously 'helm upgrade pipelines ...'
-You should to update some values:
+
+You need to update some values:
 
 - Secret:
 
@@ -154,7 +155,7 @@ You should to update some values:
     name: el-pull-request-pipeline
     namespace: ci
     spec:
-        host: change_me
+        host: CHANGE_ME
         # EXAMPLE
         # host: el-pull-request-pipeline-eventlistener-ci.apps.cluster-49lc7.dynamic.redhatworkshops.io
     ```
@@ -178,13 +179,11 @@ Once these objects were modified, run again this command:
 helm upgrade pipelines ./pullrequest/pipeline/ --install --set argocd.token=<<ArgCD-token>>
 ```
 
-From this moment, when a PR is CREATED in your Bitbucket repository, a new PipelineRun wil be created as follows: 
-
 Remember to select the 'Create a pull request for this change' option
 
 ![Commit changes](images/05.bitbucket-webhook_commit.png)
 
 
-Once you Commit the changes, your pipeline will be triggered:
+Once you update (Commit) the changes in your repo, your pipeline will be triggered as follows:
 
 ![Pipeline run](images/06.bitbucket-webhook_pipelinerun.png)
