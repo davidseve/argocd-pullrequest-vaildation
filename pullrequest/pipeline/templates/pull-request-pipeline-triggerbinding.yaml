@@ -1,0 +1,16 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerBinding
+metadata:
+  # name: pipeline-validacion-triggerbinding
+  name: pull-request-pipeline-triggerbinding
+  namespace: ci
+spec:
+  params:
+    - name: revision
+      value: $(body.pullrequest.source.branch.name)
+    - name: source-repo
+      value: $(body.repository.links.html.href)
+    - name: pr_id
+      value: $(body.pullrequest.id)
+    - name: repo_full_name
+      value: $(body.repository.full_name)
